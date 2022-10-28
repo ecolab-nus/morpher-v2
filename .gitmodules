@@ -7,3 +7,6 @@
 [submodule "cppsimulator"]
 	path = cppsimulator
 	url = https://github.com/ecolab-nus/hycube_simulator.git
+[submodule "arch_generator"]
+	path = arch_generator
+	url = https://github.com/ecolab-nus/pillars.git
