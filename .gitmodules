@@ -4,3 +4,6 @@
 [submodule "dfg_generator"]
 	path = dfg_generator
 	url = https://github.com/ecolab-nus/Morpher_DFG_Generator.git
+[submodule "cppsimulator"]
+	path = cppsimulator
+	url = https://github.com/ecolab-nus/hycube_simulator.git
