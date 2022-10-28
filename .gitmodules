@@ -1,3 +1,6 @@
 [submodule "mapper"]
 	path = mapper
 	url = https://github.com/ecolab-nus/Morpher_CGRA_Mapper.git
+[submodule "dfg_generator"]
+	path = dfg_generator
+	url = https://github.com/ecolab-nus/Morpher_DFG_Generator.git
