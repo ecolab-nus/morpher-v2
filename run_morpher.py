@@ -23,7 +23,7 @@ from time import sleep
 
 def main(csource, function, config= "config/default_config.yaml"):
 
-  runmode = 'sim_only' # runall, dfg_gen_only, mapper_only, sim_only
+  runmode = 'runall' # runall, dfg_gen_only, mapper_only, sim_only
 
   print(r"""
     __  ___                 __                 ________________  ___       ____            _                ______                                             __  
@@ -64,14 +64,17 @@ def main(csource, function, config= "config/default_config.yaml"):
   DFG_GEN_HOME = MORPHER_HOME + '/dfg_generator'
   MAPPER_HOME = MORPHER_HOME + '/mapper'
   SIMULATOR_HOME = MORPHER_HOME + '/cppsimulator'
+  ARCHGEN_HOME = MORPHER_HOME + '/arch_generator'
 
   DFG_GEN_KERNEL = DFG_GEN_HOME + '/benchmarks/'+appfolder+'/'
   MAPPER_KERNEL = MAPPER_HOME + '/benchmarks/'+mapper_subfolder+'/'+appfolder+'/'
   SIMULATOR_KERNEL =SIMULATOR_HOME + '/benchmarks/'+appfolder+'/'
+  ARCHGEN_KERNEL = ARCHGEN_HOME + '/benchmarks/'+mapper_subfolder+'/'+appfolder+'/'
 
   # my_mkdir(DFG_GEN_KERNEL)
   my_mkdir(MAPPER_KERNEL)
   my_mkdir(SIMULATOR_KERNEL)
+  my_mkdir(ARCHGEN_KERNEL)
   
   MEM_TRACE = DFG_GEN_KERNEL + 'memtraces'
   
@@ -105,9 +108,10 @@ def main(csource, function, config= "config/default_config.yaml"):
 
     os.system('dot -Tpdf %s_PartPredDFG.dot -o %s_PartPredDFG.pdf' % (kernel,kernel))
     os.system('cp '+kernel+'_PartPredDFG.xml '+ MAPPER_KERNEL )
+    os.system('cp '+kernel+'_PartPredDFG.pdf '+ ARCHGEN_KERNEL )
     os.system('rm *.log')
 
-    if json_arch == 'hycube_original_mem.json':
+    if json_arch == 'hycube_original_mem.json' or json_arch == 'stdnoc_original_mem.json' or json_arch == 'stdnoc2_original_mem.json':
       print('\nCode instrumentation..\n')
       os.system('clang -target i386-unknown-linux-gnu -c -emit-llvm -S %s/src/instrumentation/instrumentation.cpp -o instrumentation.ll' % DFG_GEN_HOME)
       if kernel=='kernel_symm':
@@ -125,7 +129,9 @@ def main(csource, function, config= "config/default_config.yaml"):
       os.system('./final 1> final_log.txt 2> final_err_log.txt')
       # os.system('./final')
       os.system('cp memtraces/'+kernel+'_trace_0.txt '+SIMULATOR_KERNEL)
+      os.system('cp memtraces/'+kernel+'_trace_0.txt '+ARCHGEN_KERNEL)
       os.system('cp '+kernel+'_mem_alloc.txt '+SIMULATOR_KERNEL )
+      os.system('cp '+kernel+'_mem_alloc.txt '+ARCHGEN_KERNEL )
       os.system('cp '+kernel+'_mem_alloc.txt '+MAPPER_KERNEL )
 
     os.system('rm *.ll')
@@ -145,7 +151,16 @@ def main(csource, function, config= "config/default_config.yaml"):
       os.system('rm *.bin')  
   
       os.chdir(MAPPER_KERNEL)
-      os.system('cp *.bin '+ SIMULATOR_KERNEL)
+      os.system('cp *.bin '+ SIMULATOR_KERNEL)  
+    elif json_arch == 'stdnoc_original_mem.json' or json_arch == 'stdnoc2_original_mem.json':
+      print('\nUpdating memory allocation..\n')
+      os.system('python %s/update_mem_alloc.py %s/json_arch/%s %s_mem_alloc.txt %d %d %s' % (MAPPER_HOME,MAPPER_HOME, json_arch_before_memupdate,kernel,banksize,numberofbanks, json_arch))
+      os.system('%s/build/src/cgra_xml_mapper -d %s_PartPredDFG.xml -x 4 -y 4 -j %s -i %d -m %d' % (MAPPER_HOME,kernel,json_arch, init_II, mapping_method))
+
+      os.system('cp %s/json_arch/%s %s'%(MAPPER_HOME, json_arch_before_memupdate, ARCHGEN_KERNEL))
+      os.system('cp *_pillars_i.txt '+ARCHGEN_KERNEL+kernel+'_i.txt ')
+      os.system('cp *_pillars_r.txt '+ARCHGEN_KERNEL+kernel+'_r.txt ')
+      os.system('cp mapped_ii.txt '+ARCHGEN_KERNEL)
     else:
       os.system('%s/build/src/cgra_xml_mapper -d %s_PartPredDFG.xml -x 4 -y 4 -j %s/json_arch/%s -i %d -m %d' % (MAPPER_HOME,kernel,MAPPER_HOME, json_arch, init_II, mapping_method))
   
@@ -193,6 +208,43 @@ def main(csource, function, config= "config/default_config.yaml"):
     print('Matches: %d Mismatches: %d' %(matches,mismatches))  #   
     if mismatches == 0:
      print('Simulation test passed!!!')
+
+  if ((runmode == 'runall' or runmode == 'sim_only') and (json_arch == 'stdnoc_original_mem.json' or json_arch == 'stdnoc2_original_mem.json')):
+    print('\n-----Running arch generator and verilator-----\n')
+    os.chdir(ARCHGEN_KERNEL)
+    os.system('rm -f datamem_details.txt')
+    os.system('echo '+ str(numberofbanks) + '>> datamem_details.txt')
+    os.system('echo '+ str(banksize) + '>> datamem_details.txt')
+    os.chdir(ARCHGEN_HOME)
+    # os.system('make morpher')
+    # command = 'sbt'+' test:runMain tetriski.pillars.examples.Morpher'
+    # command = 'sbt "test:runMain tetriski.pillars.examples.Morpher "' + ARCHGEN_KERNEL + ' ' + kernel
+    command = 'test:runMain tetriski.pillars.examples.Morpher ' + 'benchmarks/'+mapper_subfolder+'/'+appfolder+'/' + ' ' + kernel + ' ' + json_arch_before_memupdate
+    os.system('sbt ' + "'" +command+ "'")
+    # files = [f for f in listdir(MEM_TRACE) if isfile(join(MEM_TRACE, f)) and re.match(kernel+"_trace_[0-9]*\.txt", f)]
+    # # print("Number of memtraces to be verified: "+str(len(files)))
+    # if len(files) > max_test_samples:
+    #   samplefiles = np.random.choice(files, size=max_test_samples, replace=False)
+    # else:
+    #   samplefiles = np.random.choice(files, size=len(files), replace=False)
+
+    # matches = 0
+    # mismatches = 0
+    # for file in tqdm(samplefiles):
+    #     # os.system('cp '+join(MEM_TRACE, file)+' '+SIMULATOR_KERNEL)
+    #     command = SIMULATOR_HOME+'/src/build/hycube_simulator -c '+SIMULATOR_KERNEL+'*.bin -d '+join(MEM_TRACE, file)+' -a '+SIMULATOR_KERNEL+kernel+'_mem_alloc.txt -m ' + str(totalsize)
+    #     # print(command)
+    #     os.system(command)
+    #     f = open("sim_result.txt", "r")
+    #     sim_result = f.read()
+    #     sim_result_ = sim_result.split(",")
+    #     sim_result__ = [int(e) for e in sim_result_]
+    #     matches_, mismatches_ = sim_result__
+    #     matches = matches + matches_
+    #     mismatches = mismatches + mismatches_
+    # print('Matches: %d Mismatches: %d' %(matches,mismatches))  #   
+    # if mismatches == 0:
+    #  print('Simulation test passed!!!')
 
   
 
