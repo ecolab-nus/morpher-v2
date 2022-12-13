@@ -103,15 +103,15 @@ def main(csource, function, config= "config/default_config.yaml"):
     os.system('opt -gvn -mem2reg -memdep -memcpyopt -lcssa -loop-simplify -licm -loop-deletion -indvars -simplifycfg -mergereturn -indvars  %s.ll -S -o %s_opt.ll' % (kernel,kernel))
 
     print('Generating DFG (%s_PartPredDFG.xml/dot) and data layout (%s_mem_alloc.txt)..\n' % (kernel,kernel))
-    os.system('opt -load %s/build/src/libdfggenPass.so -fn %s -nobanks %d -banksize %d -type %s  -skeleton %s_opt.ll -S -o %s_opt_instrument.ll' % (DFG_GEN_HOME,kernel,numberofbanks,banksize, dfg_type,kernel,kernel))
-
+    # os.system('opt -load %s/build/src/libdfggenPass.so -fn %s -nobanks %d -banksize %d -type %s  -skeleton %s_opt.ll -S -o %s_opt_instrument.ll' % (DFG_GEN_HOME,kernel,numberofbanks,banksize, dfg_type,kernel,kernel)) 
+    os.system('opt -load %s/build/src/libdfggenPass.so -fn %s -nobanks %d -banksize %d -type %s --debug-only=%s  -skeleton %s_opt.ll -S -o %s_opt_instrument.ll' % (DFG_GEN_HOME,kernel,numberofbanks,banksize, dfg_type, llvm_debug_type,kernel,kernel))
 
     os.system('dot -Tpdf %s_PartPredDFG.dot -o %s_PartPredDFG.pdf' % (kernel,kernel))
     os.system('cp '+kernel+'_PartPredDFG.xml '+ MAPPER_KERNEL )
     os.system('cp '+kernel+'_PartPredDFG.pdf '+ ARCHGEN_KERNEL )
     os.system('rm *.log')
 
-    if json_arch == 'hycube_original_mem.json' or json_arch == 'stdnoc_original_mem.json' or json_arch == 'stdnoc2_original_mem.json':
+    if json_arch == 'hycube_original_mem.json' or json_arch == 'stdnoc_original_mem.json'or json_arch == 'stdnoc_alu_dependent_mem.json' or json_arch == 'stdnoc2_original_mem.json':
       print('\nCode instrumentation..\n')
       os.system('clang -target i386-unknown-linux-gnu -c -emit-llvm -S %s/src/instrumentation/instrumentation.cpp -o instrumentation.ll' % DFG_GEN_HOME)
       if kernel=='kernel_symm':
@@ -134,7 +134,7 @@ def main(csource, function, config= "config/default_config.yaml"):
       os.system('cp '+kernel+'_mem_alloc.txt '+ARCHGEN_KERNEL )
       os.system('cp '+kernel+'_mem_alloc.txt '+MAPPER_KERNEL )
 
-    os.system('rm *.ll')
+    #os.system('rm *.ll')
   
 ##############################################################################################################################################
   if runmode == 'runall' or runmode == 'mapper_only':
@@ -152,7 +152,7 @@ def main(csource, function, config= "config/default_config.yaml"):
   
       os.chdir(MAPPER_KERNEL)
       os.system('cp *.bin '+ SIMULATOR_KERNEL)  
-    elif json_arch == 'stdnoc_original_mem.json' or json_arch == 'stdnoc2_original_mem.json':
+    elif json_arch == 'stdnoc_original_mem.json' or json_arch == 'stdnoc_alu_dependent_mem.json' or json_arch == 'stdnoc2_original_mem.json':
       print('\nUpdating memory allocation..\n')
       os.system('python %s/update_mem_alloc.py %s/json_arch/%s %s_mem_alloc.txt %d %d %s' % (MAPPER_HOME,MAPPER_HOME, json_arch_before_memupdate,kernel,banksize,numberofbanks, json_arch))
       os.system('%s/build/src/cgra_xml_mapper -d %s_PartPredDFG.xml -x 4 -y 4 -j %s -i %d -m %d' % (MAPPER_HOME,kernel,json_arch, init_II, mapping_method))
@@ -209,7 +209,7 @@ def main(csource, function, config= "config/default_config.yaml"):
     if mismatches == 0:
      print('Simulation test passed!!!')
 
-  if ((runmode == 'runall' or runmode == 'sim_only') and (json_arch == 'stdnoc_original_mem.json' or json_arch == 'stdnoc2_original_mem.json')):
+  if ((runmode == 'runall' or runmode == 'sim_only') and (json_arch == 'stdnoc_original_mem.json' or json_arch == 'stdnoc_alu_independent_mem.json' or json_arch == 'stdnoc2_original_mem.json')):
     print('\n-----Running arch generator and verilator-----\n')
     os.chdir(ARCHGEN_KERNEL)
     os.system('rm -f datamem_details.txt')
