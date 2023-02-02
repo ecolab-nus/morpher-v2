@@ -1,0 +1,11 @@
+---
+ json_arch: "stdnoc_alu_dependent_mem.json"
+ json_arch_before_memupdate: 'stdnoc_alu_dependent_updatemem.json'
+ mapper_subfolder: 'stdnoc_alu_dependent'
+ dfg_type: 'PartPred'
+ init_II: 8
+ numberofbanks: 4
+ banksize: 2048
+ max_test_samples: 5
+ mapping_method: 0
+ llvm_debug_type: 'no'
