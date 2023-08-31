@@ -5,35 +5,41 @@ on: [push]
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
-    container: 
-      image: ubuntu:22.04 # Use a more recent Ubuntu version
+    
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+
       - name: Install Git
         run: |
-          apt-get update
-          apt-get install -y git
+          sudo apt-get update
+          sudo apt-get install -y git
+
       - name: Check Git Version
         run: git --version
+
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           submodules: recursive
+
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
+
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v1
         with:
           version: "16.0"
+
       - name: Check LLVM opt and g++ version
         run: |
           opt -version
-          g++ -v 
+          g++ -v  
       - name: Install sbt
         run: |
           echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
