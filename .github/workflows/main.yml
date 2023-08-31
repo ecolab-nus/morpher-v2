@@ -1,8 +1,12 @@
 name: Build and Test
+
 on: [push]
+
 jobs:
   Explore-GitHub-Actions:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container: 
+      image: ubuntu:22.04 # Use a more recent Ubuntu version
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
@@ -19,7 +23,7 @@ jobs:
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v1
         with:
-         version: "16.0"
+          version: "16.0"
       - name: Check LLVM opt and g++ version
         run: |
           opt -version
