@@ -46,17 +46,17 @@ jobs:
           curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo apt-key add
           sudo apt-get update
           sudo apt-get install sbt
-      - name: Install Verilator
-        run: |
-          sudo apt-get install -y autoconf g++ libfl2 libfl-dev zlib1g-dev
-          git clone http://git.veripool.org/git/verilator
-          cd verilator
-          git pull
-          git checkout v4.110  # Or any other stable version
-          autoconf
-          ./configure
-          make -j$(nproc)
-          sudo make install
+      #- name: Install Verilator
+        #run: |
+          #sudo apt-get install -y autoconf g++ libfl2 libfl-dev zlib1g-dev
+          #git clone http://git.veripool.org/git/verilator
+          #cd verilator
+          #git pull
+          #git checkout v4.110  # Or any other stable version
+          #autoconf
+          #./configure
+          #make -j$(nproc)
+          #sudo make install
       - name: Setup Python version
         uses: actions/setup-python@v2
         with:
@@ -74,9 +74,6 @@ jobs:
          sudo apt update
          sudo apt-get install -y gcc-multilib g++-multilib
          sudo apt install -y build-essential 
-         sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-         sudo apt-get update
-         sudo apt-get install -y g++-7
       - name: Build all
         run: |
           bash build_all.sh
