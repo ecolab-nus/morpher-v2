@@ -31,14 +31,19 @@ jobs:
           repository: llvm/llvm-project
           ref: llvmorg-16.0.0 # This checks out the tag for 16.0.0; you might need to adjust for the exact commit for the git version
           path: llvm-project
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build clang
 
       - name: Build LLVM
         run: |
           mkdir llvm-project/build
           cd llvm-project/build
-          cmake -G "Ninja" -DLLVM_ENABLE_PROJECTS="clang;lld;libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release ../llvm
+          cmake -G "Ninja" -DLLVM_ENABLE_PROJECTS="clang;lld;libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ../llvm
           ninja
           sudo ninja install
+
       - name: Check LLVM opt and g++ version
         run: |
           opt --version
