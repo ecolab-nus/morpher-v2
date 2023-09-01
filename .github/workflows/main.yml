@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   Explore-GitHub-Actions:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
@@ -69,21 +69,9 @@ jobs:
         run: | 
          pip install -r python_requirements.txt
          sudo apt update
-         sudo apt-get install -y software-properties-common
-         sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-         sudo apt update
-         sudo apt-get install -y gcc-multilib g++-multilib
-         sudo apt install -y build-essential
-      - name: Manually Install g++-7 and Dependencies
-        run: |
-          wget http://archive.ubuntu.com/ubuntu/pool/universe/g/gcc-7/g++-7_7.5.0-3ubuntu1~18.04_amd64.deb
-          wget http://archive.ubuntu.com/ubuntu/pool/universe/g/gcc-7/gcc-7_7.5.0-3ubuntu1~18.04_amd64.deb
-          wget http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-7/libstdc++-7-dev_7.5.0-3ubuntu1~18.04_amd64.deb
-          wget http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-7/cpp-7_7.5.0-3ubuntu1~18.04_amd64.deb
-          wget http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-7/libgcc-7-dev_7.5.0-3ubuntu1~18.04_amd64.deb
-          sudo dpkg -i *.deb
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 50
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 50    
+         sudo apt-get install gcc-multilib g++-multilib
+         sudo apt install build-essential 
+         sudo apt -y install g++-7    
       - name: Verify g++ version
         run: |
           g++ --version   
