@@ -36,6 +36,21 @@ jobs:
         with:
           version: "16.0"
 
+      - name: Install dependencies for LLVM and Clang
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libc6=2.34-0ubuntu3
+          sudo apt-get install -y libstdc++6
+
+      - name: Check the installed versions
+        run: |
+          /sbin/ldconfig -p | grep GLIBC
+          /sbin/ldconfig -p | grep GLIBCXX
+
+      - name: Use LLVM opt
+        run: |
+          opt --version
+
       - name: Check LLVM opt and g++ version
         run: |
           opt -version
