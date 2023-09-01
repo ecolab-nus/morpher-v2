@@ -22,7 +22,7 @@ jobs:
          version: "16.0"
       - name: Check LLVM opt and g++ version
         run: |
-          opt -version
+          #opt --version
           g++ -v 
       - name: Setup Python version
         uses: actions/setup-python@v2
