@@ -92,6 +92,6 @@ jobs:
           bash build_all.sh
       
       - name: Run array add
-          python -u run_morpher_llvm16.py morpher_benchmarks/array_add/array_add.c array_add
+        run:  python -u run_morpher_llvm16.py morpher_benchmarks/array_add/array_add.c array_add
       
       - run: echo "🍏 This job's status is ${{ job.status }}."
