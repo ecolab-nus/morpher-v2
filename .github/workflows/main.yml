@@ -20,12 +20,25 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v1
+      #- name: Install LLVM and Clang
+        #uses: KyleMayes/install-llvm-action@v1
+        #with:
+          #version: "16.0.0git"
+          #targets: "X86"
+      - name: Checkout LLVM
+        uses: actions/checkout@v2
         with:
-          version: "16.0.0git"
-          targets: "X86"
-      
+          repository: llvm/llvm-project
+          ref: llvmorg-16.0.0 # This checks out the tag for 16.0.0; you might need to adjust for the exact commit for the git version
+          path: llvm-project
+
+      - name: Build LLVM
+        run: |
+          mkdir llvm-project/build
+          cd llvm-project/build
+          cmake -G "Ninja" -DLLVM_ENABLE_PROJECTS="clang;lld;libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release ../llvm
+          ninja
+          sudo ninja install
       - name: Check LLVM opt and g++ version
         run: |
           opt --version
