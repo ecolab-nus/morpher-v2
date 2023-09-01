@@ -40,7 +40,7 @@ jobs:
         run: |
           mkdir llvm-project/build
           cd llvm-project/build
-          cmake -G "Ninja" -DLLVM_ENABLE_PROJECTS="clang;lld;libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ../llvm
+          cmake -G "Ninja" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ../llvm
           ninja
           sudo ninja install
 
