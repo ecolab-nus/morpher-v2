@@ -1,84 +1,76 @@
 name: Build and Test
 on: [push]
+
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-22.04
+
+    # Define a cache key for pip dependencies.
+    # This cache will be identified using the hash of your python_requirements.txt.
+    # If the requirements file hasn't changed since the last run, the cache will be reused.
+    env:
+      PIP_CACHE_DIR: ~\pip_cache
+
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      
+
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
           submodules: recursive
-      
+
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      
+
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
-      
-      - name: Install LLVM and Clang
+
+      # Cache LLVM and Clang installation
+      - name: Cache LLVM
+        uses: actions/cache@v3
+        with:
+          path: path_to_llvm_installation_directory
+          key: llvm-16.0
+          restore-keys: |
+            llvm-16.0
+
+      - name: Install LLVM and Clang if not cached
+        if: steps.cache-llvm.outputs.cache-hit != 'true'
         uses: KyleMayes/install-llvm-action@v1
         with:
           version: "16.0"
           targets: "X86"
-      # - name: Checkout LLVM
-      #   uses: actions/checkout@v2
-      #   with:
-      #    repository: llvm/llvm-project
-      #    ref: llvmorg-12.0.0 # This checks out the tag for 16.0.0; you might need to adjust for the exact commit for the git version
-      #    path: llvm-project
-      # - name: Install Dependencies
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install -y ninja-build clang
-
-      # - name: Build LLVM
-      #   run: |
-      #     mkdir llvm-project/build
-      #     cd llvm-project/build
-      #     cmake -G "Ninja" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ../llvm
-      #     ninja
-          # sudo ninja install
 
       - name: Check LLVM opt and g++ version
         run: |
           opt --version
           g++ -v  
-          
-      # - name: Install sbt
-      #   run: |
-      #     echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
-      #     curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo apt-key add
-      #     sudo apt-get update
-      #     sudo apt-get install sbt
-          
-      # - name: Install Verilator
-      #   run: |
-      #     sudo apt-get install -y autoconf g++ libfl2 libfl-dev zlib1g-dev
-      #     git clone http://git.veripool.org/git/verilator
-      #     cd verilator
-      #     git pull
-      #     git checkout v4.110  # Or any other stable version
-      #     autoconf
-      #     ./configure
-      #     make -j$(nproc)
-      #     sudo make install
-      
+
+      # Cache Python dependencies
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.PIP_CACHE_DIR }}
+          key: pip-${{ hashFiles('**/python_requirements.txt') }}
+          restore-keys: |
+            pip-
+
       - name: Setup Python version
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
-      
+
       - name: Create and start virtual environment
         run: |
           python3 -m venv venv
           source venv/bin/activate
-      
+
+      # Only install if cache was not hit
       - name: Install dependencies
+        if: steps.cache-pip.outputs.cache-hit != 'true'
         run: | 
           echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu focal main universe" | sudo tee -a /etc/apt/sources.list
           sudo apt update
@@ -86,34 +78,13 @@ jobs:
           pip install -r python_requirements.txt
           sudo apt-get install gcc-multilib g++-multilib
           sudo apt install build-essential 
-      
+
       - name: Build all
         run: |
           bash build_all.sh
-      # - name: Checkout LLVM
-      #   uses: actions/checkout@v2
-      #   with:
-      #     repository: llvm/llvm-project
-      #     ref: llvmorg-16.0.0 # This checks out the tag for 16.0.0; you might need to adjust for the exact commit for the git version
-      #     path: llvm-project
-      # - name: Install Dependencies
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install -y ninja-build clang
 
-      # - name: Build LLVM
-      #   run: |
-      #     mkdir llvm-project/build
-      #     cd llvm-project/build
-      #     cmake -G "Ninja" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ../llvm
-      #     ninja
-      #     sudo ninja install
-      # - name: Check LLVM opt and g++ version
-      #   run: |
-      #     opt --version
-      #     g++ -v 
-      
       - name: Run array add
         run:  python -u run_morpher_llvm16.py morpher_benchmarks/array_add/array_add.c array_add
-      
+
       - run: echo "🍏 This job's status is ${{ job.status }}."
+
