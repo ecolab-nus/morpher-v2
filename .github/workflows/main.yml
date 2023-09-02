@@ -90,6 +90,15 @@ jobs:
       - name: Build all
         run: |
           bash build_all.sh
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v1
+        with:
+          version: "16.0"
+          targets: "X86"
+      - name: Check LLVM opt and g++ version
+        run: |
+          opt --version
+          g++ -v 
       
       - name: Run array add
         run:  python -u run_morpher_llvm16.py morpher_benchmarks/array_add/array_add.c array_add
