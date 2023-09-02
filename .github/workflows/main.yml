@@ -20,29 +20,29 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v1
+      # - name: Install LLVM and Clang
+      #   uses: KyleMayes/install-llvm-action@v1
+      #   with:
+      #     version: "12.0"
+      #     targets: "X86"
+      - name: Checkout LLVM
+        uses: actions/checkout@v2
         with:
-          version: "12.0"
-          targets: "X86"
-      #- name: Checkout LLVM
-       # uses: actions/checkout@v2
-       # with:
-         # repository: llvm/llvm-project
-          #ref: llvmorg-16.0.0 # This checks out the tag for 16.0.0; you might need to adjust for the exact commit for the git version
-          #path: llvm-project
-      #- name: Install Dependencies
-        #run: |
-          #sudo apt-get update
-          #sudo apt-get install -y ninja-build clang
+         repository: llvm/llvm-project
+         ref: llvmorg-12.0.0 # This checks out the tag for 16.0.0; you might need to adjust for the exact commit for the git version
+         path: llvm-project
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build clang
 
-      #- name: Build LLVM
-        #run: |
-          #mkdir llvm-project/build
-          #cd llvm-project/build
-          #cmake -G "Ninja" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ../llvm
-          #ninja
-          #sudo ninja install
+      - name: Build LLVM
+        run: |
+          mkdir llvm-project/build
+          cd llvm-project/build
+          cmake -G "Ninja" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ../llvm
+          ninja
+          sudo ninja install
 
       - name: Check LLVM opt and g++ version
         run: |
@@ -90,28 +90,28 @@ jobs:
       - name: Build all
         run: |
           bash build_all.sh
-      - name: Checkout LLVM
-        uses: actions/checkout@v2
-        with:
-          repository: llvm/llvm-project
-          ref: llvmorg-16.0.0 # This checks out the tag for 16.0.0; you might need to adjust for the exact commit for the git version
-          path: llvm-project
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ninja-build clang
+      # - name: Checkout LLVM
+      #   uses: actions/checkout@v2
+      #   with:
+      #     repository: llvm/llvm-project
+      #     ref: llvmorg-16.0.0 # This checks out the tag for 16.0.0; you might need to adjust for the exact commit for the git version
+      #     path: llvm-project
+      # - name: Install Dependencies
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y ninja-build clang
 
-      - name: Build LLVM
-        run: |
-          mkdir llvm-project/build
-          cd llvm-project/build
-          cmake -G "Ninja" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ../llvm
-          ninja
-          sudo ninja install
-      - name: Check LLVM opt and g++ version
-        run: |
-          opt --version
-          g++ -v 
+      # - name: Build LLVM
+      #   run: |
+      #     mkdir llvm-project/build
+      #     cd llvm-project/build
+      #     cmake -G "Ninja" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ../llvm
+      #     ninja
+      #     sudo ninja install
+      # - name: Check LLVM opt and g++ version
+      #   run: |
+      #     opt --version
+      #     g++ -v 
       
       - name: Run array add
         run:  python -u run_morpher_llvm16.py morpher_benchmarks/array_add/array_add.c array_add
