@@ -2,7 +2,7 @@ cd dfg_generator
 mkdir build
 cd build
 cmake ..
-make  -j 2
+make VERBOSE=1 -j 4
 cd ../../mapper
 mkdir build
 cd build
