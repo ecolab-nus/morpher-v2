@@ -81,7 +81,9 @@ jobs:
 
       - name: Build all
         run: |
-          bash build_all.sh
+          # bash build_all.sh
+          /usr/bin/c++ --version
+          cd /home/runner/work/morpher-v2/morpher-v2/dfg_generator/build/src && /usr/bin/c++ -DdfggenPass_EXPORTS -I/home/runner/work/morpher-v2/morpher-v2/llvm/include -I/home/runner/work/morpher-v2/morpher-v2/dfg_generator/include -fPIC   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -fno-rtti -ggdb -MD -MT src/CMakeFiles/dfggenPass.dir/common/dfg.cpp.o -MF CMakeFiles/dfggenPass.dir/common/dfg.cpp.o.d -o CMakeFiles/dfggenPass.dir/common/dfg.cpp.o -c /home/runner/work/morpher-v2/morpher-v2/dfg_generator/src/common/dfg.cpp
 
       - name: Run array add
         run:  python -u run_morpher_llvm16.py morpher_benchmarks/array_add/array_add.c array_add
