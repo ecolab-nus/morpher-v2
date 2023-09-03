@@ -1,15 +1,14 @@
 name: Build and Test
+
 on: [push]
 
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-22.04
 
-    # Define a cache key for pip dependencies.
-    # This cache will be identified using the hash of your python_requirements.txt.
-    # If the requirements file hasn't changed since the last run, the cache will be reused.
     env:
       PIP_CACHE_DIR: ~\pip_cache
+      LLVM_BUILD_DIR: ${{ github.workspace }}/llvm-project/llvm-build
 
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
@@ -25,33 +24,42 @@ jobs:
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
 
       - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}
+        run: ls ${{ github.workspace }}
 
-      # Cache LLVM and Clang installation
-      - name: Cache LLVM
-        uses: actions/cache@v3
+      # Cache the LLVM build
+      - name: Cache LLVM Build
+        id: cache-llvm-build
+        uses: actions/cache@v2
         with:
-          path: path_to_llvm_installation_directory
-          key: llvm-16.0
+          path: ${{ env.LLVM_BUILD_DIR }}
+          key: llvm-build-99020b3c73c1e22fa388be8fd0c44391d40b3a38
           restore-keys: |
-            llvm-16.0
+            llvm-build-
 
-      - name: Install LLVM and Clang if not cached
-        if: steps.cache-llvm.outputs.cache-hit != 'true'
-        uses: KyleMayes/install-llvm-action@v1
-        with:
-          version: "16.0"
-          targets: "X86"
+      # Checkout and build LLVM from specific commit only if cache miss
+      - name: Checkout and Build LLVM
+        if: steps.cache-llvm-build.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/llvm/llvm-project.git
+          cd llvm-project
+          git checkout 99020b3c73c1e22fa388be8fd0c44391d40b3a38
+          git log
+          mkdir -p llvm-build
+          cd llvm-build
+          cmake -G "Unix Makefiles" ../llvm
+          make -j$(nproc)
+
+      - name: Add LLVM to PATH
+        run: echo "$GITHUB_WORKSPACE/llvm-project/llvm-build/bin" >> $GITHUB_PATH
 
       - name: Check LLVM opt and g++ version
         run: |
           opt --version
-          g++ -v  
+          g++ -v
 
       # Cache Python dependencies
       - name: Cache pip dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v2
         with:
           path: ${{ env.PIP_CACHE_DIR }}
           key: pip-${{ hashFiles('**/python_requirements.txt') }}
@@ -82,13 +90,8 @@ jobs:
       - name: Build all
         run: |
           bash build_all.sh
-          # /usr/bin/c++ --version
-          cat /home/runner/work/morpher-v2/morpher-v2/llvm/include/llvm/IR/BasicBlock.h
-      # - name: Test
-      #   run: cd /home/runner/work/morpher-v2/morpher-v2/dfg_generator/build/src && /usr/bin/c++ -DdfggenPass_EXPORTS -I/home/runner/work/morpher-v2/morpher-v2/llvm/include -I/home/runner/work/morpher-v2/morpher-v2/dfg_generator/include -std=gnu++17 -fPIC -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -fno-rtti -ggdb -MD -MT src/CMakeFiles/dfggenPass.dir/common/dfg.cpp.o -MF CMakeFiles/dfggenPass.dir/common/dfg.cpp.o.d -o CMakeFiles/dfggenPass.dir/common/dfg.cpp.o -c /home/runner/work/morpher-v2/morpher-v2/dfg_generator/src/common/dfg.cpp
 
       - name: Run array add
         run:  python -u run_morpher_llvm16.py morpher_benchmarks/array_add/array_add.c array_add
 
       - run: echo "🍏 This job's status is ${{ job.status }}."
-
