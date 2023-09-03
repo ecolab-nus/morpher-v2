@@ -45,7 +45,7 @@ jobs:
           git checkout 99020b3c73c1e22fa388be8fd0c44391d40b3a38
           mkdir -p llvm-build
           cd llvm-build
-          cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ../llvm
+          cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ../llvm
           make -j$(nproc)
 
       - name: Add LLVM to PATH
