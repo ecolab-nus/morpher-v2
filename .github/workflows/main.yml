@@ -83,6 +83,7 @@ jobs:
         run: |
           bash build_all.sh
           # /usr/bin/c++ --version
+          cat /home/runner/work/morpher-v2/morpher-v2/llvm/include/llvm/IR/BasicBlock.h
       # - name: Test
       #   run: cd /home/runner/work/morpher-v2/morpher-v2/dfg_generator/build/src && /usr/bin/c++ -DdfggenPass_EXPORTS -I/home/runner/work/morpher-v2/morpher-v2/llvm/include -I/home/runner/work/morpher-v2/morpher-v2/dfg_generator/include -std=gnu++17 -fPIC -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -fno-rtti -ggdb -MD -MT src/CMakeFiles/dfggenPass.dir/common/dfg.cpp.o -MF CMakeFiles/dfggenPass.dir/common/dfg.cpp.o.d -o CMakeFiles/dfggenPass.dir/common/dfg.cpp.o -c /home/runner/work/morpher-v2/morpher-v2/dfg_generator/src/common/dfg.cpp
 
