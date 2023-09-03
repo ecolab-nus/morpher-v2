@@ -45,8 +45,8 @@ jobs:
           git checkout 99020b3c73c1e22fa388be8fd0c44391d40b3a38
           mkdir -p ${{ env.LLVM_BUILD_DIR }}
           cd ${{ env.LLVM_BUILD_DIR }}
-          cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ../llvm
-          make -j$(nproc)
+          cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DLLVM_TARGETS_TO_BUILD="X86" ../llvm
+          make -j2
 
       - name: Add LLVM to PATH
         run: echo "$GITHUB_WORKSPACE/llvm-project/llvm-build/bin" >> $GITHUB_PATH
@@ -55,6 +55,9 @@ jobs:
         run: |
           opt --version
           g++ -v
+
+      - name: Disk space check before cache
+        run: df -h
 
       # Cache Python dependencies
       - name: Cache pip dependencies
@@ -65,6 +68,9 @@ jobs:
           key: pip-${{ hashFiles('**/python_requirements.txt') }}
           restore-keys: |
             pip-
+
+      - name: Disk space check after cache
+        run: df -h
 
       - name: Setup Python version
         uses: actions/setup-python@v2
@@ -82,14 +88,22 @@ jobs:
         run: | 
           echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu focal main universe" | sudo tee -a /etc/apt/sources.list
           sudo apt update
+          sudo apt clean
+          sudo rm -rf /var/lib/apt/lists/*
           sudo apt -y install g++-7 
           pip install -r python_requirements.txt
           sudo apt-get install gcc-multilib g++-multilib
           sudo apt install build-essential 
 
+      - name: Disk space check after install
+        run: df -h
+
       - name: Build all
         run: |
           bash build_all.sh
+
+      - name: Disk space check after build
+        run: df -h
 
       - name: Run array add
         run:  python -u run_morpher_llvm16.py morpher_benchmarks/array_add/array_add.c array_add
