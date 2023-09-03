@@ -43,7 +43,6 @@ jobs:
           git clone https://github.com/llvm/llvm-project.git
           cd llvm-project
           git checkout 99020b3c73c1e22fa388be8fd0c44391d40b3a38
-          git log
           mkdir -p llvm-build
           cd llvm-build
           cmake -G "Unix Makefiles" ../llvm
