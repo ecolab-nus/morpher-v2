@@ -7,7 +7,6 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      PIP_CACHE_DIR: ~\pip_cache
       LLVM_BUILD_DIR: ${{ github.workspace }}/llvm-project/llvm-build
 
     steps:
@@ -26,19 +25,7 @@ jobs:
       - name: List files in the repository
         run: ls ${{ github.workspace }}
 
-      # Cache the LLVM build
-      - name: Cache LLVM Build
-        id: cache-llvm-build
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.LLVM_BUILD_DIR }}
-          key: llvm-${{ runner.os }}-${{ hashFiles('llvm-project/llvm/CMakeLists.txt') }}
-          restore-keys: |
-            llvm-${{ runner.os }}-
-
-      # Checkout and build LLVM from specific commit only if cache miss
       - name: Checkout and Build LLVM
-        # if: steps.cache-llvm-build.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/llvm/llvm-project.git
           cd llvm-project
@@ -56,52 +43,7 @@ jobs:
           opt --version
           g++ -v
 
-      - name: Disk space check before cache
-        run: df -h
-
-      # Cache Python dependencies
-      - name: Cache pip dependencies
-        id: cache-pip
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.PIP_CACHE_DIR }}
-          key: pip-${{ hashFiles('**/python_requirements.txt') }}
-          restore-keys: |
-            pip-
-
-      - name: Disk space check after cache
-        run: df -h
-
-      - name: Setup Python version
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-
-      - name: Create and start virtual environment
-        run: |
-          python3 -m venv venv
-          source venv/bin/activate
-
-      # Only install if cache was not hit
-      - name: Install dependencies
-        #if: steps.cache-pip.outputs.cache-hit != 'true'
-        run: | 
-          # echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu focal main universe" | sudo tee -a /etc/apt/sources.list
-          # sudo apt update
-          # sudo apt clean
-          # sudo rm -rf /var/lib/apt/lists/*
-          # sudo apt -y install g++-7 
-          # pip install -r python_requirements.txt
-          # sudo apt-get install gcc-multilib g++-multilib
-          # sudo apt install build-essential 
-          echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu focal main universe" | sudo tee -a /etc/apt/sources.list
-          sudo apt update
-          sudo apt -y install g++-7 
-          pip install -r python_requirements.txt
-          sudo apt-get install gcc-multilib g++-multilib
-          sudo apt install build-essential 
-
-      - name: Disk space check after install
+      - name: Disk space check
         run: df -h
 
       - name: Install sbt
@@ -122,6 +64,28 @@ jobs:
           ./configure
           make -j$(nproc)
           sudo make install
+
+      - name: Setup Python version
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Create and start virtual environment
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+
+      - name: Install dependencies
+        run: | 
+          echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu focal main universe" | sudo tee -a /etc/apt/sources.list
+          sudo apt update
+          sudo apt -y install g++-7 
+          pip install -r python_requirements.txt
+          sudo apt-get install gcc-multilib g++-multilib
+          sudo apt install build-essential 
+
+      - name: Disk space check after install
+        run: df -h
 
       - name: Build all
         run: |
