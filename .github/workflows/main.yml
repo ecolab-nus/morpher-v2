@@ -84,7 +84,7 @@ jobs:
 
       # Only install if cache was not hit
       - name: Install dependencies
-        if: steps.cache-pip.outputs.cache-hit != 'true'
+        #if: steps.cache-pip.outputs.cache-hit != 'true'
         run: | 
           echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu focal main universe" | sudo tee -a /etc/apt/sources.list
           sudo apt update
