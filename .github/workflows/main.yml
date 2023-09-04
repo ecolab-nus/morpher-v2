@@ -38,7 +38,7 @@ jobs:
 
       # Checkout and build LLVM from specific commit only if cache miss
       - name: Checkout and Build LLVM
-        #if: steps.cache-llvm-build.outputs.cache-hit != 'true'
+        if: steps.cache-llvm-build.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/llvm/llvm-project.git
           cd llvm-project
@@ -86,10 +86,16 @@ jobs:
       - name: Install dependencies
         #if: steps.cache-pip.outputs.cache-hit != 'true'
         run: | 
+          # echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu focal main universe" | sudo tee -a /etc/apt/sources.list
+          # sudo apt update
+          # sudo apt clean
+          # sudo rm -rf /var/lib/apt/lists/*
+          # sudo apt -y install g++-7 
+          # pip install -r python_requirements.txt
+          # sudo apt-get install gcc-multilib g++-multilib
+          # sudo apt install build-essential 
           echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu focal main universe" | sudo tee -a /etc/apt/sources.list
           sudo apt update
-          sudo apt clean
-          sudo rm -rf /var/lib/apt/lists/*
           sudo apt -y install g++-7 
           pip install -r python_requirements.txt
           sudo apt-get install gcc-multilib g++-multilib
