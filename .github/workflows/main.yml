@@ -38,14 +38,14 @@ jobs:
 
       # Checkout and build LLVM from specific commit only if cache miss
       - name: Checkout and Build LLVM
-        if: steps.cache-llvm-build.outputs.cache-hit != 'true'
+        #if: steps.cache-llvm-build.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/llvm/llvm-project.git
           cd llvm-project
           git checkout 99020b3c73c1e22fa388be8fd0c44391d40b3a38
           mkdir -p ${{ env.LLVM_BUILD_DIR }}
           cd ${{ env.LLVM_BUILD_DIR }}
-          cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD="X86" ../llvm
+          cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=TRUE -DLLVM_TARGETS_TO_BUILD="X86" ../llvm
           make -j$(nproc)
 
       - name: Add LLVM to PATH
