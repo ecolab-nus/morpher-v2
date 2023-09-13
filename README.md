@@ -1,4 +1,3 @@
-
 # Morpher-v2: An Open-Source Tool for CGRA Accelerators
 
 ![Morpher Cover](https://user-images.githubusercontent.com/12274945/198943201-17e9ff67-62b3-445f-bd04-feac08da1601.png)
@@ -22,7 +21,9 @@ Welcome to **Morpher**, an open-source framework that provides comprehensive sup
 
 **Video Demonstration**: Dive into the capabilities of Morpher as it highlights the CGRA compilation, architecture generation, and simulation flow.
 
-[Video Demonstration](https://github.com/ecolab-nus/morpher-v2/assets/12274945/69bc4b89-f447-4614-aeba-985d7e37d270)
+https://github.com/ecolab-nus/morpher-v2/assets/12274945/c5e6f136-0051-4059-8f59-c6a788efc7d0
+
+
 
 
 # Build and Run Guide for Morpher-v2
