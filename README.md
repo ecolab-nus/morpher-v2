@@ -4,6 +4,7 @@
 
 [![Actions Status](https://github.com/ecolab-nus/morpher-v2/workflows/Build%20and%20Test/badge.svg)](https://github.com/ecolab-nus/morpher-v2/actions)
 
+**Note**: Compared to [Morpher](https://github.com/ecolab-nus/morpher), Morpher-v2 can automatically generate RTL and synthesis. If you do not need this function, we suggest using [Morpher](https://github.com/ecolab-nus/morpher)
 
 Welcome to **Morpher**, an open-source framework that provides comprehensive support for modeling diverse Coarse-Grained Reconfigurable Array (CGRA) architectures. The framework offers the following key features:
 
