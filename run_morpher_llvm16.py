@@ -103,8 +103,12 @@ def main(csource, function, config= "config/default_config.yaml"):
     os.system('opt -gvn -mem2reg -memdep -memcpyopt -lcssa -loop-simplify -licm -loop-deletion -indvars -simplifycfg -mergereturn -indvars  %s.ll -S -o %s_opt.ll' % (kernel,kernel))
 
     print('Generating DFG (%s_PartPredDFG.xml/dot) and data layout (%s_mem_alloc.txt)..\n' % (kernel,kernel))
+    # Run in RELEASE (i.e., no DEBUG outputs)
     os.system('opt -load %s/build/src/libdfggenPass.so -fn %s -nobanks %d -banksize %d -type %s  -enable-new-pm=0 -dfggen %s_opt.ll -S -o %s_opt_instrument.ll' % (DFG_GEN_HOME,kernel,numberofbanks,banksize, dfg_type,kernel,kernel))
-    #os.system('opt -load %s/build/src/libdfggenPass.so -debug -fn %s -nobanks %d -banksize %d -type %s  -enable-new-pm=0 -dfggen %s_opt.ll -S -o %s_opt_instrument.ll' % (DFG_GEN_HOME,kernel,numberofbanks,banksize, dfg_type,kernel,kernel))
+
+    # Run in DEBUG
+    # TODO: remove debug run, uncomment the line above
+    # os.system('opt -load %s/build/src/libdfggenPass.so -debug -fn %s -nobanks %d -banksize %d -type %s  -enable-new-pm=0 -dfggen %s_opt.ll -S -o %s_opt_instrument.ll' % (DFG_GEN_HOME,kernel,numberofbanks,banksize, dfg_type,kernel,kernel))
 
 
     os.system('dot -Tpdf %s_PartPredDFG.dot -o %s_PartPredDFG.pdf' % (kernel,kernel))
@@ -150,7 +154,7 @@ def main(csource, function, config= "config/default_config.yaml"):
       os.system('%s/build/src/cgra_xml_mapper -d %s_PartPredDFG.xml -x 4 -y 4 -j %s -i %d -t HyCUBE_4REG -m %d' % (MAPPER_HOME,kernel,json_arch, init_II, mapping_method))
 
       os.chdir(SIMULATOR_KERNEL)
-      os.system('rm *.bin')  
+      # os.system('rm *.bin')  
   
       os.chdir(MAPPER_KERNEL)
       os.system('cp *.bin '+ SIMULATOR_KERNEL)  
@@ -163,6 +167,8 @@ def main(csource, function, config= "config/default_config.yaml"):
       os.system('cp *_pillars_i.txt '+ARCHGEN_KERNEL+kernel+'_i.txt ')
       os.system('cp *_pillars_r.txt '+ARCHGEN_KERNEL+kernel+'_r.txt ')
       os.system('cp mapped_ii.txt '+ARCHGEN_KERNEL)
+      # Added by me
+      os.system('cp *.bin '+ SIMULATOR_KERNEL)  
     else:
       os.system('%s/build/src/cgra_xml_mapper -d %s_PartPredDFG.xml -x 4 -y 4 -j %s/json_arch/%s -i %d -m %d' % (MAPPER_HOME,kernel,MAPPER_HOME, json_arch, init_II, mapping_method))
   

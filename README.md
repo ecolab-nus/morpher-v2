@@ -26,9 +26,89 @@ More information:
 https://github.com/ecolab-nus/morpher-v2/assets/12274945/c5e6f136-0051-4059-8f59-c6a788efc7d0
 
 
+# Docker container: Build and Run Guide for Morpher-v2
+
+###  1. Build Docker container and create an interactive shell into it
+```
+    sudo docker build -t morpher-ubuntu-22.04 .
+    sudo docker run --name morpher-ubuntu-22.04_container -it morpher-ubuntu-22.04
+```
+
+### 2. Move in `/home` directory
+```
+    cd /home
+```
+Install sbt
+echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list
+curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | apt-key add
+apt-get update
+apt-get install sbt
+deb https://repo.scala-sbt.org/scalasbt/debian /
+
+### 3. Install LLVM
+
+```
+git clone https://github.com/llvm/llvm-project.git
+cd llvm-project
+git checkout 99020b3c73c1e22fa388be8fd0c44391d40b3a38
+mkdir llvm-build && cd llvm-build
+cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=TRUE -DLLVM_TARGETS_TO_BUILD="X86" ../llvm
+make -j16
+	export PATH=/home/llvm-project/llvm-build/bin:$PATH
+```
+
+### 4. Install Verilator
+
+```
+apt-get install -y autoconf g++ libfl2 libfl-dev zlib1g-dev
+git clone https://github.com/verilator/verilator.git
+cd verilator
+git pull
+git checkout v4.110  
+autoconf
+./configure
+make -j16
+make install
+```
+
+### 5. Setup Python 
+```
+#  Since Python 3.8 is deprecated (i.e., can’t be installed w/ apt), we use python 3.10 instead
+apt install -y python3.10-venv
+python3 -m venv venv
+source venv/bin/activate	
+```
+ 
+### 6. Go into the `/home` directory and then clone Morpher V2
+```
+cd /home && \ 
+git clone --recurse-submodules  https://github.com/ecolab-nus/morpher-v2.git && \
+cd morpher-v2
+```
+
+### 7. Install dependencies
+
+```
+echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu focal main universe" | tee -a /etc/apt/sources.list
+apt -y install g++-7 
+pip install -r python_requirements.txt
+apt-get install -y gcc-multilib g++-multilib
+apt install -y build-essential 
+
+```
+
+### 8. Build Morpher v2
+```
+bash build_all.sh
+```
+ 
+### 9. Run Morpher v2 DEMO
+```
+	python -u run_morpher_llvm16.py morpher_benchmarks/array_add/array_add.c array_add
+```
 
 
-# Build and Run Guide for Morpher-v2
+# Locally: Build and Run Guide for Morpher-v2
 
 ## Prerequisites
 
