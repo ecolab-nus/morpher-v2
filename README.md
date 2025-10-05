@@ -32,59 +32,73 @@ https://github.com/ecolab-nus/morpher-v2/assets/12274945/c5e6f136-0051-4059-8f59
 
 ## Prerequisites
 
-- An environment running **Ubuntu 22.04**.
+- An environment running **Ubuntu 22.04** on an x86-based machine.
 
 ## Setup and Build Steps
 
 1. **Clone and Setup the Repository**:
+
 ```bash
-git clone [YOUR_REPOSITORY_LINK] 
-cd [YOUR_REPOSITORY_NAME]       
+git clone --recurse-submodules https://github.com/ecolab-nus/morpher-v2.git
+cd https://github.com/ecolab-nus/morpher-v2.git       
 ```
 
-2. **Setup LLVM**:
+2. **Install Essential Build Tools**:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y build-essential curl cmake python3 python3-pip python3-venv 
+```
+
+3. **Setup LLVM**:
 
 ```bash
 git clone https://github.com/llvm/llvm-project.git
 cd llvm-project
 git checkout 99020b3c73c1e22fa388be8fd0c44391d40b3a38
 mkdir llvm-build && cd llvm-build
+# TODO: switch to Ninja generator for CMake-based builds.
 cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=TRUE -DLLVM_TARGETS_TO_BUILD="X86" ../llvm
 make -j$(nproc)
 ```
-3. **Add LLVM to PATH**:
+
+4. **Add LLVM to PATH**:
 
 ```bash
 export PATH=$PATH:[YOUR_PATH_TO_LLVM]/llvm-project/llvm-build/bin
 ```
+
 4. **Install sbt**:
 
 ```bash
 echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
+# TODO: replace deprecated apt-key with gpg  
 curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo apt-key add
 sudo apt-get update
 sudo apt-get install sbt
 ```
+
 5. **Install Verilator**:
 
 ```bash
-sudo apt-get install -y autoconf g++ libfl2 libfl-dev zlib1g-dev
-git clone http://git.veripool.org/git/verilator
+sudo apt-get install -y autoconf libfl2 libfl-dev zlib1g-dev bison
+git clone https://github.com/verilator/verilator.git
 cd verilator
-git pull
 git checkout v4.110  
 autoconf
+autoupdate
 ./configure
 make -j$(nproc)
 sudo make install
 ```
-6. **Setup Python**:
+
+6. **Setup Python Virtual Environment**:
 
 ```bash
-sudo apt install python3.8
 python3 -m venv venv
 source venv/bin/activate
 ```
+
 7. **Install Dependencies**:
 
 ```bash
@@ -93,13 +107,14 @@ sudo apt update
 sudo apt -y install g++-7 
 pip install -r python_requirements.txt
 sudo apt-get install gcc-multilib g++-multilib
-sudo apt install build-essential 
 ```
+
 8. **Build**:
 
 ```bash
 bash build_all.sh
 ```
+
 9. **Run**:
 
 ```bash

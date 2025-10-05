@@ -1,3 +1,7 @@
+# Set desired GCC version
+export CC=gcc-7
+export CXX=g++-7
+
 cd dfg_generator
 mkdir build
 cd build
@@ -14,4 +18,4 @@ mkdir build
 cd build
 cmake ..
 make all -j
-echo "buld success!!!"
+echo "build success!!!"
